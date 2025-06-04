@@ -1,0 +1,35 @@
+{
+  "name": "turkiyamode-store",
+  "version": "1.0.0",
+  "description": "Современный интернет-магазин одежды и техники TurkiyaMode с интеграцией WhatsApp и Telegram",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "deploy": "gh-pages -d ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/turkiyamode.git"
+  },
+  "keywords": [
+    "ecommerce",
+    "online-store",
+    "clothing",
+    "electronics",
+    "whatsapp",
+    "telegram",
+    "responsive",
+    "modern-design"
+  ],
+  "author": "TurkiyaMode",
+  "license": "MIT",
+  "homepage": "https://username.github.io/turkiyamode/",
+  "devDependencies": {
+    "gh-pages": "^4.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
