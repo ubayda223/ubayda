@@ -1,674 +1,332 @@
-// Global variables
-let currentTheme = 'light';
-let cart = [];
-let products = [];
-let userProfile = {
-    name: '',
-    phone: '',
-    address: ''
-};
-
-// Sample products data
-const sampleProducts = [
-    {
-        id: 1,
-        name: 'Турецкая рубашка',
-        price: 250,
-        category: 'clothing',
-        description: 'Качественная хлопковая рубашка',
-        image: '👔'
-    },
-    {
-        id: 2,
-        name: 'Джинсы премиум',
-        price: 400,
-        category: 'clothing',
-        description: 'Стильные джинсы из Турции',
-        image: '👖'
-    },
-    {
-        id: 3,
-        name: 'Женское платье',
-        price: 350,
-        category: 'clothing',
-        description: 'Элегантное вечернее платье',
-        image: '👗'
-    },
-    {
-        id: 4,
-        name: 'Смартфон',
-        price: 1200,
-        category: 'electronics',
-        description: 'Современный смартфон',
-        image: '📱'
-    },
-    {
-        id: 5,
-        name: 'Наушники',
-        price: 150,
-        category: 'electronics',
-        description: 'Беспроводные наушники',
-        image: '🎧'
-    },
-    {
-        id: 6,
-        name: 'Ноутбук',
-        price: 2500,
-        category: 'electronics',
-        description: 'Игровой ноутбук',
-        image: '💻'
-    },
-    {
-        id: 7,
-        name: 'Кроссовки',
-        price: 300,
-        category: 'clothing',
-        description: 'Спортивные кроссовки',
-        image: '👟'
-    },
-    {
-        id: 8,
-        name: 'Планшет',
-        price: 800,
-        category: 'electronics',
-        description: 'Планшет для работы',
-        image: '📟'
-    }
-];
-
-// Initialize app
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-});
-
-function initializeApp() {
-    loadTheme();
-    loadProducts();
-    loadUserProfile();
-    loadCart();
-    setupEventListeners();
-    updateCartDisplay();
-}
-
-// Event listeners
-function setupEventListeners() {
-    // Navigation
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const target = this.getAttribute('href').substring(1);
-            showSection(target);
-            updateActiveNav(this);
-        });
-    });
-
-    // Theme toggle
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
-    // Filter buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const category = this.dataset.category;
-            filterProducts(category);
-            updateActiveFilter(this);
-        });
-    });
-
-    // Mobile menu toggle
-    document.getElementById('menuToggle').addEventListener('click', toggleMobileMenu);
-}
-
-// Theme management
-function toggleTheme() {
-    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-    applyTheme();
-    saveTheme();
-}
-
-function applyTheme() {
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    const themeIcon = document.querySelector('#themeToggle i');
-    themeIcon.className = currentTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-}
-
-function saveTheme() {
-    // Store theme preference in memory
-    window.themePreference = currentTheme;
-}
-
-function loadTheme() {
-    // Load theme preference from memory
-    currentTheme = window.themePreference || 'light';
-    applyTheme();
-}
-
-// Navigation
-function showSection(sectionId) {
-    // Hide all sections
-    document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Show target section
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.classList.add('active');
-    }
-}
-
-function updateActiveNav(activeLink) {
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    activeLink.classList.add('active');
-}
-
-// Products management
-function loadProducts() {
-    products = [...sampleProducts];
-    displayProducts(products);
-}
-
-function displayProducts(productsToShow) {
-    const grid = document.getElementById('productsGrid');
-    grid.innerHTML = '';
-    
-    productsToShow.forEach(product => {
-        const productCard = createProductCard(product);
-        grid.appendChild(productCard);
-    });
-}
-
-function createProductCard(product) {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-        <div class="product-image">${product.image}</div>
-        <div class="product-info">
-            <h3 class="product-title">${product.name}</h3>
-            <p class="product-description">${product.description}</p>
-            <div class="product-price">${product.price} сомони</div>
-            <button class="btn btn-primary" onclick="addToCart(${product.id})">
-                <i class="fas fa-shopping-cart"></i>
-                Добавить в корзину
-            </button>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurkiyaMode - Магазин одежды и техники</title>
+    <meta name="description" content="TurkiyaMode - Качественная одежда и современная техника по доступным ценам">
+    <meta name="keywords" content="Магазин одежды, Турция, техника, доставка">
+    <meta name="author" content="TurkiyaMode">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🛍️ TurkiyaMode</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="#home" class="nav-link active">Главная</a></li>
+                    <li><a href="#shop" class="nav-link">Магазин</a></li>
+                    <li><a href="#profile" class="nav-link">Профиль</a></li>
+                    <li><a href="#cart" class="nav-link">Корзина <span class="cart-count">0</span></a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </div>
-    `;
-    return card;
-}
+    </header>
 
-function filterProducts(category) {
-    const filteredProducts = category === 'all' 
-        ? products 
-        : products.filter(p => p.category === category);
-    displayProducts(filteredProducts);
-}
-
-function updateActiveFilter(activeBtn) {
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    activeBtn.classList.add('active');
-}
-
-// Cart management
-function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
-    const existingItem = cart.find(item => item.id === productId);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            ...product,
-            quantity: 1
-        });
-    }
-    
-    saveCart();
-    updateCartDisplay();
-    showMessage('Товар добавлен в корзину!', 'success');
-}
-
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
-    saveCart();
-    updateCartDisplay();
-    displayCart();
-}
-
-function updateQuantity(productId, change) {
-    const item = cart.find(item => item.id === productId);
-    if (item) {
-        item.quantity += change;
-        if (item.quantity <= 0) {
-            removeFromCart(productId);
-        } else {
-            saveCart();
-            updateCartDisplay();
-            displayCart();
-        }
-    }
-}
-
-function updateCartDisplay() {
-    const cartCount = document.querySelector('.cart-count');
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalItems;
-}
-
-function displayCart() {
-    const cartItems = document.getElementById('cartItems');
-    const subtotal = document.getElementById('subtotal');
-    const total = document.getElementById('total');
-    
-    if (cart.length === 0) {
-        cartItems.innerHTML = '<p class="empty-cart">Корзина пуста</p>';
-        subtotal.textContent = '0 сомони';
-        total.textContent = '0 сомони';
-        return;
-    }
-    
-    let cartHTML = '';
-    let totalPrice = 0;
-    
-    cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        totalPrice += itemTotal;
-        
-        cartHTML += `
-            <div class="cart-item">
-                <div class="cart-item-image">${item.image}</div>
-                <div class="cart-item-info">
-                    <div class="cart-item-title">${item.name}</div>
-                    <div class="cart-item-price">${item.price} сомони</div>
-                </div>
-                <div class="cart-item-controls">
-                    <div class="quantity-controls">
-                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h2>Добро пожаловать в TurkiyaMode</h2>
+                    <p>Качественная одежда и современная техника по доступным ценам</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="showSection('shop')">Перейти в магазин</button>
+                        <a href="https://t.me/ubayda_1507" class="btn btn-secondary" target="_blank">
+                            <i class="fab fa-telegram"></i> Связаться в Telegram
+                        </a>
                     </div>
-                    <button class="remove-btn" onclick="removeFromCart(${item.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                </div>
+                <div class="hero-image">
+                    <div class="hero-card">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
                 </div>
             </div>
-        `;
-    });
-    
-    cartItems.innerHTML = cartHTML;
-    subtotal.textContent = `${totalPrice} сомони`;
-    total.textContent = `${totalPrice} сомони`;
-}
-
-function saveCart() {
-    window.cartData = cart;
-}
-
-function loadCart() {
-    cart = window.cartData || [];
-    displayCart();
-}
-
-// Checkout functionality
-function checkout() {
-    if (cart.length === 0) {
-        showMessage('Корзина пуста!', 'error');
-        return;
-    }
-    
-    if (!userProfile.name || !userProfile.phone) {
-        showMessage('Пожалуйста, заполните профиль перед оформлением заказа!', 'error');
-        showSection('profile');
-        return;
-    }
-    
-    showOrderOptions();
-}
-
-function showOrderOptions() {
-    const orderText = generateOrderText();
-    
-    const modal = document.createElement('div');
-    modal.className = 'order-modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Оформление заказа</h3>
-                <button class="close-modal" onclick="closeOrderModal()">×</button>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-tshirt"></i>
+                    <h3>Модная одежда</h3>
+                    <p>Последние тренды из Турции</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-laptop"></i>
+                    <h3>Современная техника</h3>
+                    <p>Качественная электроника</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3>Быстрая доставка</h3>
+                    <p>Доставим в кратчайшие сроки</p>
+                </div>
             </div>
-            <div class="modal-body">
-                <p>Выберите способ оформления заказа:</p>
-                <div class="order-options">
-                    <button class="btn btn-primary" onclick="orderViaWhatsApp()">
-                        <i class="fab fa-whatsapp"></i>
-                        Заказать через WhatsApp
-                    </button>
-                    <button class="btn btn-secondary" onclick="orderViaTelegram()">
-                        <i class="fab fa-telegram"></i>
-                        Заказать через Telegram
-                    </button>
+        </section>
+
+        <!-- Shop Section -->
+        <section id="shop" class="section">
+            <div class="container">
+                <h2>Наш магазин</h2>
+                <div class="shop-filters">
+                    <button class="filter-btn active" data-category="all">Все товары</button>
+                    <button class="filter-btn" data-category="clothing">Одежда</button>
+                    <button class="filter-btn" data-category="electronics">Техника</button>
                 </div>
-                <div class="order-preview">
-                    <h4>Детали заказа:</h4>
-                    <div class="order-details">${orderText}</div>
+                
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be loaded here -->
                 </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="section">
+            <div class="container">
+                <div class="profile-container">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3>Мой профиль</h3>
+                        </div>
+                        <div class="profile-form">
+                            <div class="form-group">
+                                <label>Имя</label>
+                                <input type="text" id="userName" placeholder="Введите ваше имя">
+                            </div>
+                            <div class="form-group">
+                                <label>Телефон</label>
+                                <input type="tel" id="userPhone" placeholder="+992 __ ___ __ __">
+                            </div>
+                            <div class="form-group">
+                                <label>Адрес</label>
+                                <textarea id="userAddress" placeholder="Ваш адрес доставки"></textarea>
+                            </div>
+                            <button class="btn btn-primary" onclick="saveProfile()">Сохранить</button>
+                        </div>
+                    </div>
+                    
+                    <div class="orders-card">
+                        <h3>История заказов</h3>
+                        <div class="orders-list" id="ordersList">
+                            <p class="no-orders">У вас пока нет заказов</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cart Section -->
+        <section id="cart" class="section">
+            <div class="container">
+                <h2>Корзина</h2>
+                <div class="cart-container">
+                    <div class="cart-items" id="cartItems">
+                        <p class="empty-cart">Корзина пуста</p>
+                    </div>
+                    <div class="cart-summary">
+                        <div class="summary-card">
+                            <h3>Итого</h3>
+                            <div class="summary-row">
+                                <span>Товары:</span>
+                                <span id="subtotal">0 сомони</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Доставка:</span>
+                                <span>Бесплатно</span>
+                            </div>
+                            <div class="summary-total">
+                                <span>Всего:</span>
+                                <span id="total">0 сомони</span>
+                            </div>
+                            <button class="btn btn-primary btn-full" onclick="checkout()">Оформить заказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Добавление формы для добавления товара -->
+        <section id="add-product" class="section">
+            <div class="container">
+                <h2>Добавить товар</h2>
+                <form id="addProductForm">
+                    <div class="form-group">
+                        <label for="productName">Название товара</label>
+                        <input type="text" id="productName" name="productName" placeholder="Введите название" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Цена</label>
+                        <input type="number" id="productPrice" name="productPrice" placeholder="Введите цену" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Категория</label>
+                        <select id="productCategory" name="productCategory" required>
+                            <option value="clothing">Одежда</option>
+                            <option value="electronics">Техника</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Описание</label>
+                        <textarea id="productDescription" name="productDescription" placeholder="Введите описание" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="productImage">Фото</label>
+                        <input type="file" id="productImage" name="productImage" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить товар</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Contact Buttons -->
+    <div class="contact-buttons">
+        <a href="https://t.me/ubayda_1507" class="contact-btn telegram" target="_blank">
+            <i class="fab fa-telegram" alt="Telegram"></i>
+        </a>
+        <a href="https://wa.me/992905746633" class="contact-btn whatsapp" target="_blank">
+            <i class="fab fa-whatsapp" alt="WhatsApp"></i>
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>TurkiyaMode</h3>
+                    <p>Ваш надежный партнер в мире моды и технологий</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p><i class="fas fa-phone"></i> +992 90 574 66 33</p>
+                    <p><i class="fab fa-telegram"></i> @ubayda_1507</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Следите за нами</h4>
+                    <div class="social-links">
+                        <a href="https://t.me/ubayda_1507" target="_blank"><i class="fab fa-telegram"></i></a>
+                        <a href="https://wa.me/992905746633" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 TurkiyaMode. Все права защищены.</p>
+                <p><a href="privacy-policy.html">Политика конфиденциальности</a> | <a href="terms-of-service.html">Условия использования</a></p>
             </div>
         </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Add modal styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .order-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
+    </footer>
+
+    <script src="script.js"></script>
+
+    <!-- Подключение Firebase SDK -->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyA2EpLzJrcsTt7kK8sF_yzs7XJtl0R7Ybg",
+        authDomain: "mymessenger-d6514.firebaseapp.com",
+        projectId: "mymessenger-d6514",
+        storageBucket: "mymessenger-d6514.appspot.com",
+        messagingSenderId: "677038576951",
+        appId: "1:677038576951:web:18331d03b1b04cfb60b6b2",
+        measurementId: "G-47C9XNK252"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Example function to add a product to Firestore
+      async function addProductToDatabase(product) {
+        try {
+          const docRef = await db.collection("products").add(product);
+          console.log("Product added with ID: ", docRef.id);
+        } catch (error) {
+          console.error("Error adding product: ", error);
         }
-        
-        .modal-content {
-            background: var(--surface-color);
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-        }
-        
-        .order-options {
-            display: flex;
+      }
+
+      // Example usage
+      const exampleProduct = {
+        name: "Турецкая рубашка",
+        price: 250,
+        category: "clothing",
+        description: "Качественная хлопковая рубашка",
+        image: "👔"
+      };
+      addProductToDatabase(exampleProduct);
+    </script>
+
+    <!-- Effects and Lazy Loading -->
+    <style>
+    .contact-btn:hover {
+        transform: scale(1.1);
+        transition: transform 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .nav-menu ul {
             flex-direction: column;
-            gap: 1rem;
-            margin: 1.5rem 0;
         }
-        
-        .order-preview {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
+        .hero-content {
+            text-align: center;
         }
-        
-        .order-details {
-            background: var(--background-color);
-            padding: 1rem;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            white-space: pre-line;
-            max-height: 200px;
-            overflow-y: auto;
+    }
+    </style>
+
+    <!-- Обработка формы добавления товара -->
+    <script>
+    const addProductForm = document.getElementById('addProductForm');
+    addProductForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('productName').value;
+        const price = document.getElementById('productPrice').value;
+        const category = document.getElementById('productCategory').value;
+        const description = document.getElementById('productDescription').value;
+        const image = document.getElementById('productImage').files[0];
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const newProduct = {
+                id: Date.now(),
+                name,
+                price,
+                category,
+                description,
+                image: e.target.result
+            };
+
+            products.push(newProduct);
+            displayProducts(products);
+            addProductForm.reset();
+            alert('Товар успешно добавлен!');
+        };
+
+        if (image) {
+            reader.readAsDataURL(image);
         }
-    `;
-    document.head.appendChild(style);
-}
-
-function closeOrderModal() {
-    const modal = document.querySelector('.order-modal');
-    if (modal) {
-        modal.remove();
-    }
-}
-
-function generateOrderText() {
-    let orderText = `🛍️ НОВЫЙ ЗАКАЗ - TurkiyaMode\n\n`;
-    orderText += `👤 Клиент: ${userProfile.name}\n`;
-    orderText += `📞 Телефон: ${userProfile.phone}\n`;
-    orderText += `📍 Адрес: ${userProfile.address}\n\n`;
-    orderText += `🛒 ТОВАРЫ:\n`;
-    
-    let totalPrice = 0;
-    cart.forEach((item, index) => {
-        const itemTotal = item.price * item.quantity;
-        totalPrice += itemTotal;
-        orderText += `${index + 1}. ${item.name}\n`;
-        orderText += `   Цена: ${item.price} сомони\n`;
-        orderText += `   Количество: ${item.quantity}\n`;
-        orderText += `   Сумма: ${itemTotal} сомони\n\n`;
     });
-    
-    orderText += `💰 ИТОГО: ${totalPrice} сомони\n\n`;
-    orderText += `📅 Дата заказа: ${new Date().toLocaleDateString('ru-RU')}\n`;
-    orderText += `🕐 Время: ${new Date().toLocaleTimeString('ru-RU')}`;
-    
-    return orderText;
-}
-
-function orderViaWhatsApp() {
-    const orderText = generateOrderText();
-    const phoneNumber = '992905746633';
-    const encodedText = encodeURIComponent(orderText);
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedText}`;
-    
-    // Open WhatsApp
-    window.open(whatsappUrl, '_blank');
-    
-    // Clear cart and close modal
-    setTimeout(() => {
-        clearCartAfterOrder();
-        closeOrderModal();
-    }, 1000);
-}
-
-function orderViaTelegram() {
-    const orderText = generateOrderText();
-    const telegramUsername = 'ubayda_1507';
-    const encodedText = encodeURIComponent(orderText);
-    const telegramUrl = `https://t.me/${telegramUsername}?text=${encodedText}`;
-    
-    // Open Telegram
-    window.open(telegramUrl, '_blank');
-    
-    // Clear cart and close modal
-    setTimeout(() => {
-        clearCartAfterOrder();
-        closeOrderModal();
-    }, 1000);
-}
-
-function clearCartAfterOrder() {
-    // Save order to history
-    const order = {
-        id: Date.now(),
-        date: new Date().toLocaleDateString('ru-RU'),
-        items: [...cart],
-        total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        status: 'Отправлен'
-    };
-    
-    // Add to order history
-    const orders = window.orderHistory || [];
-    orders.unshift(order);
-    window.orderHistory = orders;
-    
-    // Clear cart
-    cart = [];
-    saveCart();
-    updateCartDisplay();
-    displayCart();
-    
-    showMessage('Заказ успешно отправлен! Мы свяжемся с вами в ближайшее время.', 'success');
-}
-
-// Profile management
-function saveProfile() {
-    const name = document.getElementById('userName').value.trim();
-    const phone = document.getElementById('userPhone').value.trim();
-    const address = document.getElementById('userAddress').value.trim();
-    
-    if (!name || !phone || !address) {
-        showMessage('Пожалуйста, заполните все поля!', 'error');
-        return;
-    }
-    
-    userProfile = { name, phone, address };
-    window.userProfileData = userProfile;
-    
-    showMessage('Профиль успешно сохранен!', 'success');
-    displayOrderHistory();
-}
-
-function loadUserProfile() {
-    userProfile = window.userProfileData || { name: '', phone: '', address: '' };
-    
-    document.getElementById('userName').value = userProfile.name;
-    document.getElementById('userPhone').value = userProfile.phone;
-    document.getElementById('userAddress').value = userProfile.address;
-    
-    displayOrderHistory();
-}
-
-function displayOrderHistory() {
-    const ordersList = document.getElementById('ordersList');
-    const orders = window.orderHistory || [];
-    
-    if (orders.length === 0) {
-        ordersList.innerHTML = '<p class="no-orders">У вас пока нет заказов</p>';
-        return;
-    }
-    
-    let ordersHTML = '';
-    orders.forEach(order => {
-        ordersHTML += `
-            <div class="order-item">
-                <div class="order-header">
-                    <span class="order-id">Заказ #${order.id}</span>
-                    <span class="order-date">${order.date}</span>
-                </div>
-                <div class="order-status">Статус: ${order.status}</div>
-                <div class="order-total">Сумма: ${order.total} сомони</div>
-                <div class="order-items">
-                    Товаров: ${order.items.reduce((sum, item) => sum + item.quantity, 0)}
-                </div>
-            </div>
-        `;
-    });
-    
-    ordersList.innerHTML = ordersHTML;
-}
-
-// Utility functions
-function showMessage(message, type) {
-    // Remove existing messages
-    const existingMessages = document.querySelectorAll('.message');
-    existingMessages.forEach(msg => msg.remove());
-    
-    // Create new message
-    const messageEl = document.createElement('div');
-    messageEl.className = `message ${type}`;
-    messageEl.textContent = message;
-    
-    // Insert at the top of the active section
-    const activeSection = document.querySelector('.section.active');
-    if (activeSection) {
-        activeSection.insertBefore(messageEl, activeSection.firstChild);
-    }
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        messageEl.remove();
-    }, 5000);
-}
-
-function toggleMobileMenu() {
-    const navMenu = document.querySelector('.nav-menu');
-    navMenu.classList.toggle('active');
-}
-
-// Initialize cart display when cart section is shown
-document.addEventListener('DOMContentLoaded', function() {
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const cartSection = document.getElementById('cart');
-                if (cartSection && cartSection.classList.contains('active')) {
-                    displayCart();
-                }
-            }
-        });
-    });
-    
-    const cartSection = document.getElementById('cart');
-    if (cartSection) {
-        observer.observe(cartSection, { attributes: true });
-    }
-});
-
-// Add styles for order history
-const orderHistoryStyles = `
-.order-item {
-    background: var(--background-color);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-.order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
-
-.order-id {
-    color: var(--primary-color);
-}
-
-.order-date {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-.order-status {
-    color: var(--secondary-color);
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-}
-
-.order-total {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.no-orders {
-    text-align: center;
-    color: var(--text-secondary);
-    font-style: italic;
-    padding: 2rem;
-}
-`;
-
-// Add the styles to the document
-const styleSheet = document.createElement('style');
-styleSheet.textContent = orderHistoryStyles;
-document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>
