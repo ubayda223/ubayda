@@ -161,7 +161,41 @@
             </div>
         </section>
 
-        <!-- Добавление формы для добавления товара -->
+        <!-- Добавление секции для аутентификации -->
+        <section id="auth" class="section">
+            <div class="container">
+                <h2>Аутентификация</h2>
+                <div class="auth-container">
+                    <form id="loginForm">
+                        <h3>Вход</h3>
+                        <div class="form-group">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" name="loginEmail" placeholder="Введите email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Пароль</label>
+                            <input type="password" id="loginPassword" name="loginPassword" placeholder="Введите пароль" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Войти</button>
+                    </form>
+
+                    <form id="registerForm">
+                        <h3>Регистрация</h3>
+                        <div class="form-group">
+                            <label for="registerEmail">Email</label>
+                            <input type="email" id="registerEmail" name="registerEmail" placeholder="Введите email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Пароль</label>
+                            <input type="password" id="registerPassword" name="registerPassword" placeholder="Введите пароль" required>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Зарегистрироваться</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Обновление секции добавления товара -->
         <section id="add-product" class="section">
             <div class="container">
                 <h2>Добавить товар</h2>
