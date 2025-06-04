@@ -1,160 +1,148 @@
 // Global variables
+let currentTheme = 'light';
 let cart = [];
 let products = [];
-let userProfile = {};
-let orders = [];
-let currentTheme = 'light';
+let userProfile = {
+    name: '',
+    phone: '',
+    address: ''
+};
 
 // Sample products data
 const sampleProducts = [
     {
         id: 1,
-        name: 'Стильная куртка',
-        description: 'Модная турецкая куртка высокого качества',
-        price: 450,
+        name: 'Турецкая рубашка',
+        price: 250,
         category: 'clothing',
-        image: '🧥'
+        description: 'Качественная хлопковая рубашка',
+        image: '👔'
     },
     {
         id: 2,
-        name: 'Классические джинсы',
-        description: 'Удобные джинсы из качественного денима',
-        price: 280,
+        name: 'Джинсы премиум',
+        price: 400,
         category: 'clothing',
+        description: 'Стильные джинсы из Турции',
         image: '👖'
     },
     {
         id: 3,
-        name: 'Элегантная блузка',
-        description: 'Женская блузка для офиса и торжеств',
-        price: 190,
+        name: 'Женское платье',
+        price: 350,
         category: 'clothing',
-        image: '👚'
+        description: 'Элегантное вечернее платье',
+        image: '👗'
     },
     {
         id: 4,
-        name: 'Смартфон Premium',
-        description: 'Современный смартфон с отличной камерой',
-        price: 2500,
+        name: 'Смартфон',
+        price: 1200,
         category: 'electronics',
+        description: 'Современный смартфон',
         image: '📱'
     },
     {
         id: 5,
-        name: 'Беспроводные наушники',
-        description: 'Качественные наушники с шумоподавлением',
-        price: 350,
+        name: 'Наушники',
+        price: 150,
         category: 'electronics',
+        description: 'Беспроводные наушники',
         image: '🎧'
     },
     {
         id: 6,
-        name: 'Планшет для работы',
-        description: 'Производительный планшет для учебы и работы',
-        price: 1800,
+        name: 'Ноутбук',
+        price: 2500,
         category: 'electronics',
-        image: '📟'
+        description: 'Игровой ноутбук',
+        image: '💻'
     },
     {
         id: 7,
-        name: 'Спортивный костюм',
-        description: 'Комфортный костюм для спорта и отдыха',
-        price: 320,
+        name: 'Кроссовки',
+        price: 300,
         category: 'clothing',
-        image: '👕'
+        description: 'Спортивные кроссовки',
+        image: '👟'
     },
     {
         id: 8,
-        name: 'Умные часы',
-        description: 'Смарт-часы с множеством функций',
-        price: 890,
+        name: 'Планшет',
+        price: 800,
         category: 'electronics',
-        image: '⌚'
+        description: 'Планшет для работы',
+        image: '📟'
     }
 ];
 
-// Initialize the application
+// Initialize app
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
-    setupEventListeners();
-    loadProducts();
-    loadUserData();
 });
 
-// Initialize application
 function initializeApp() {
-    products = [...sampleProducts];
-    
-    // Load theme preference
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-    
-    // Load cart from localStorage
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-        cart = JSON.parse(savedCart);
-        updateCartUI();
-    }
-    
-    // Load user profile
-    const savedProfile = localStorage.getItem('userProfile');
-    if (savedProfile) {
-        userProfile = JSON.parse(savedProfile);
-        loadProfileData();
-    }
-    
-    // Load orders
-    const savedOrders = localStorage.getItem('orders');
-    if (savedOrders) {
-        orders = JSON.parse(savedOrders);
-        loadOrdersHistory();
-    }
+    loadTheme();
+    loadProducts();
+    loadUserProfile();
+    loadCart();
+    setupEventListeners();
+    updateCartDisplay();
 }
 
-// Setup event listeners
+// Event listeners
 function setupEventListeners() {
     // Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            const section = this.getAttribute('href').substring(1);
-            showSection(section);
-            setActiveNavLink(this);
+            const target = this.getAttribute('href').substring(1);
+            showSection(target);
+            updateActiveNav(this);
         });
     });
-    
+
     // Theme toggle
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-    
+
     // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            const category = this.getAttribute('data-category');
+            const category = this.dataset.category;
             filterProducts(category);
-            setActiveFilter(this);
+            updateActiveFilter(this);
         });
     });
-    
+
     // Mobile menu toggle
     document.getElementById('menuToggle').addEventListener('click', toggleMobileMenu);
 }
 
 // Theme management
 function toggleTheme() {
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    applyTheme();
+    saveTheme();
 }
 
-function setTheme(theme) {
-    currentTheme = theme;
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', currentTheme);
     const themeIcon = document.querySelector('#themeToggle i');
-    themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+    themeIcon.className = currentTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
 }
 
-// Navigation functions
+function saveTheme() {
+    // Store theme preference in memory
+    window.themePreference = currentTheme;
+}
+
+function loadTheme() {
+    // Load theme preference from memory
+    currentTheme = window.themePreference || 'light';
+    applyTheme();
+}
+
+// Navigation
 function showSection(sectionId) {
     // Hide all sections
     document.querySelectorAll('.section').forEach(section => {
@@ -162,18 +150,13 @@ function showSection(sectionId) {
     });
     
     // Show target section
-    document.getElementById(sectionId).classList.add('active');
-    
-    // Update URL hash
-    window.history.pushState({}, '', `#${sectionId}`);
-    
-    // Special handling for shop section
-    if (sectionId === 'shop') {
-        displayProducts();
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
     }
 }
 
-function setActiveNavLink(activeLink) {
+function updateActiveNav(activeLink) {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
@@ -182,42 +165,46 @@ function setActiveNavLink(activeLink) {
 
 // Products management
 function loadProducts() {
-    displayProducts();
+    products = [...sampleProducts];
+    displayProducts(products);
 }
 
-function displayProducts(category = 'all') {
-    const productsGrid = document.getElementById('productsGrid');
-    let filteredProducts = category === 'all' 
-        ? products 
-        : products.filter(product => product.category === category);
+function displayProducts(productsToShow) {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = '';
     
-    if (filteredProducts.length === 0) {
-        productsGrid.innerHTML = '<p class="text-center">Товары не найдены</p>';
-        return;
-    }
-    
-    productsGrid.innerHTML = filteredProducts.map(product => `
-        <div class="product-card" data-category="${product.category}">
-            <div class="product-image">
-                ${product.image}
-            </div>
-            <div class="product-info">
-                <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
-                <div class="product-price">${product.price} сомони</div>
-                <button class="btn btn-primary" onclick="addToCart(${product.id})">
-                    <i class="fas fa-cart-plus"></i> В корзину
-                </button>
-            </div>
+    productsToShow.forEach(product => {
+        const productCard = createProductCard(product);
+        grid.appendChild(productCard);
+    });
+}
+
+function createProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
+        <div class="product-image">${product.image}</div>
+        <div class="product-info">
+            <h3 class="product-title">${product.name}</h3>
+            <p class="product-description">${product.description}</p>
+            <div class="product-price">${product.price} сомони</div>
+            <button class="btn btn-primary" onclick="addToCart(${product.id})">
+                <i class="fas fa-shopping-cart"></i>
+                Добавить в корзину
+            </button>
         </div>
-    `).join('');
+    `;
+    return card;
 }
 
 function filterProducts(category) {
-    displayProducts(category);
+    const filteredProducts = category === 'all' 
+        ? products 
+        : products.filter(p => p.category === category);
+    displayProducts(filteredProducts);
 }
 
-function setActiveFilter(activeBtn) {
+function updateActiveFilter(activeBtn) {
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -227,8 +214,6 @@ function setActiveFilter(activeBtn) {
 // Cart management
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
-    if (!product) return;
-    
     const existingItem = cart.find(item => item.id === productId);
     
     if (existingItem) {
@@ -240,52 +225,60 @@ function addToCart(productId) {
         });
     }
     
-    updateCartUI();
-    saveCartToStorage();
+    saveCart();
+    updateCartDisplay();
     showMessage('Товар добавлен в корзину!', 'success');
 }
 
 function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
-    updateCartUI();
-    saveCartToStorage();
-    showMessage('Товар удален из корзины', 'success');
+    saveCart();
+    updateCartDisplay();
+    displayCart();
 }
 
 function updateQuantity(productId, change) {
     const item = cart.find(item => item.id === productId);
-    if (!item) return;
-    
-    item.quantity += change;
-    
-    if (item.quantity <= 0) {
-        removeFromCart(productId);
-        return;
+    if (item) {
+        item.quantity += change;
+        if (item.quantity <= 0) {
+            removeFromCart(productId);
+        } else {
+            saveCart();
+            updateCartDisplay();
+            displayCart();
+        }
     }
-    
-    updateCartUI();
-    saveCartToStorage();
 }
 
-function updateCartUI() {
+function updateCartDisplay() {
     const cartCount = document.querySelector('.cart-count');
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCount.textContent = totalItems;
+}
+
+function displayCart() {
     const cartItems = document.getElementById('cartItems');
     const subtotal = document.getElementById('subtotal');
     const total = document.getElementById('total');
     
-    // Update cart count
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalItems;
-    
-    // Update cart items
     if (cart.length === 0) {
         cartItems.innerHTML = '<p class="empty-cart">Корзина пуста</p>';
-    } else {
-        cartItems.innerHTML = cart.map(item => `
+        subtotal.textContent = '0 сомони';
+        total.textContent = '0 сомони';
+        return;
+    }
+    
+    let cartHTML = '';
+    let totalPrice = 0;
+    
+    cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        totalPrice += itemTotal;
+        
+        cartHTML += `
             <div class="cart-item">
-                <div class="cart-item-image">
-                    ${item.image}
-                </div>
+                <div class="cart-item-image">${item.image}</div>
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.name}</div>
                     <div class="cart-item-price">${item.price} сомони</div>
@@ -301,20 +294,24 @@ function updateCartUI() {
                     </button>
                 </div>
             </div>
-        `).join('');
-    }
+        `;
+    });
     
-    // Update totals
-    const subtotalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    subtotal.textContent = `${subtotalAmount} сомони`;
-    total.textContent = `${subtotalAmount} сомони`;
+    cartItems.innerHTML = cartHTML;
+    subtotal.textContent = `${totalPrice} сомони`;
+    total.textContent = `${totalPrice} сомони`;
 }
 
-function saveCartToStorage() {
-    localStorage.setItem('cart', JSON.stringify(cart));
+function saveCart() {
+    window.cartData = cart;
 }
 
-// Checkout function
+function loadCart() {
+    cart = window.cartData || [];
+    displayCart();
+}
+
+// Checkout functionality
 function checkout() {
     if (cart.length === 0) {
         showMessage('Корзина пуста!', 'error');
@@ -322,154 +319,282 @@ function checkout() {
     }
     
     if (!userProfile.name || !userProfile.phone) {
-        showMessage('Пожалуйста, заполните профиль перед оформлением заказа', 'error');
+        showMessage('Пожалуйста, заполните профиль перед оформлением заказа!', 'error');
         showSection('profile');
         return;
     }
     
-    // Create order
+    showOrderOptions();
+}
+
+function showOrderOptions() {
+    const orderText = generateOrderText();
+    
+    const modal = document.createElement('div');
+    modal.className = 'order-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Оформление заказа</h3>
+                <button class="close-modal" onclick="closeOrderModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Выберите способ оформления заказа:</p>
+                <div class="order-options">
+                    <button class="btn btn-primary" onclick="orderViaWhatsApp()">
+                        <i class="fab fa-whatsapp"></i>
+                        Заказать через WhatsApp
+                    </button>
+                    <button class="btn btn-secondary" onclick="orderViaTelegram()">
+                        <i class="fab fa-telegram"></i>
+                        Заказать через Telegram
+                    </button>
+                </div>
+                <div class="order-preview">
+                    <h4>Детали заказа:</h4>
+                    <div class="order-details">${orderText}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add modal styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .order-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .modal-content {
+            background: var(--surface-color);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        
+        .order-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .order-preview {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .order-details {
+            background: var(--background-color);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-line;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function closeOrderModal() {
+    const modal = document.querySelector('.order-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function generateOrderText() {
+    let orderText = `🛍️ НОВЫЙ ЗАКАЗ - TurkiyaMode\n\n`;
+    orderText += `👤 Клиент: ${userProfile.name}\n`;
+    orderText += `📞 Телефон: ${userProfile.phone}\n`;
+    orderText += `📍 Адрес: ${userProfile.address}\n\n`;
+    orderText += `🛒 ТОВАРЫ:\n`;
+    
+    let totalPrice = 0;
+    cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        totalPrice += itemTotal;
+        orderText += `${index + 1}. ${item.name}\n`;
+        orderText += `   Цена: ${item.price} сомони\n`;
+        orderText += `   Количество: ${item.quantity}\n`;
+        orderText += `   Сумма: ${itemTotal} сомони\n\n`;
+    });
+    
+    orderText += `💰 ИТОГО: ${totalPrice} сомони\n\n`;
+    orderText += `📅 Дата заказа: ${new Date().toLocaleDateString('ru-RU')}\n`;
+    orderText += `🕐 Время: ${new Date().toLocaleTimeString('ru-RU')}`;
+    
+    return orderText;
+}
+
+function orderViaWhatsApp() {
+    const orderText = generateOrderText();
+    const phoneNumber = '992905746633';
+    const encodedText = encodeURIComponent(orderText);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank');
+    
+    // Clear cart and close modal
+    setTimeout(() => {
+        clearCartAfterOrder();
+        closeOrderModal();
+    }, 1000);
+}
+
+function orderViaTelegram() {
+    const orderText = generateOrderText();
+    const telegramUsername = 'ubayda_1507';
+    const encodedText = encodeURIComponent(orderText);
+    const telegramUrl = `https://t.me/${telegramUsername}?text=${encodedText}`;
+    
+    // Open Telegram
+    window.open(telegramUrl, '_blank');
+    
+    // Clear cart and close modal
+    setTimeout(() => {
+        clearCartAfterOrder();
+        closeOrderModal();
+    }, 1000);
+}
+
+function clearCartAfterOrder() {
+    // Save order to history
     const order = {
         id: Date.now(),
         date: new Date().toLocaleDateString('ru-RU'),
         items: [...cart],
         total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        status: 'Новый',
-        customer: { ...userProfile }
+        status: 'Отправлен'
     };
     
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-    
-    // Generate order message
-    const orderMessage = generateOrderMessage(order);
-    
-    // Send to Telegram and WhatsApp
-    sendOrderToTelegram(orderMessage);
-    sendOrderToWhatsApp(orderMessage);
+    // Add to order history
+    const orders = window.orderHistory || [];
+    orders.unshift(order);
+    window.orderHistory = orders;
     
     // Clear cart
     cart = [];
-    updateCartUI();
-    saveCartToStorage();
+    saveCart();
+    updateCartDisplay();
+    displayCart();
     
-    // Update orders history
-    loadOrdersHistory();
-    
-    showMessage('Заказ успешно оформлен! Мы свяжемся с вами в ближайшее время.', 'success');
-}
-
-function generateOrderMessage(order) {
-    let message = `🛍️ *Новый заказ #${order.id}*\n\n`;
-    message += `👤 *Клиент:* ${order.customer.name}\n`;
-    message += `📞 *Телефон:* ${order.customer.phone}\n`;
-    message += `📍 *Адрес:* ${order.customer.address}\n\n`;
-    message += `📦 *Товары:*\n`;
-    
-    order.items.forEach(item => {
-        message += `• ${item.name} x${item.quantity} - ${item.price * item.quantity} сомони\n`;
-    });
-    
-    message += `\n💰 *Итого:* ${order.total} сомони\n`;
-    message += `📅 *Дата:* ${order.date}`;
-    
-    return message;
-}
-
-function sendOrderToTelegram(message) {
-    const telegramUrl = `https://t.me/ubayda_1507?text=${encodeURIComponent(message)}`;
-    window.open(telegramUrl, '_blank');
-}
-
-function sendOrderToWhatsApp(message) {
-    const whatsappUrl = `https://wa.me/992905746633?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    showMessage('Заказ успешно отправлен! Мы свяжемся с вами в ближайшее время.', 'success');
 }
 
 // Profile management
 function saveProfile() {
-    const name = document.getElementById('userName').value;
-    const phone = document.getElementById('userPhone').value;
-    const address = document.getElementById('userAddress').value;
+    const name = document.getElementById('userName').value.trim();
+    const phone = document.getElementById('userPhone').value.trim();
+    const address = document.getElementById('userAddress').value.trim();
     
-    if (!name || !phone) {
-        showMessage('Пожалуйста, заполните имя и телефон', 'error');
+    if (!name || !phone || !address) {
+        showMessage('Пожалуйста, заполните все поля!', 'error');
         return;
     }
     
     userProfile = { name, phone, address };
-    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    window.userProfileData = userProfile;
     
     showMessage('Профиль успешно сохранен!', 'success');
+    displayOrderHistory();
 }
 
-function loadProfileData() {
-    if (userProfile.name) {
-        document.getElementById('userName').value = userProfile.name;
-    }
-    if (userProfile.phone) {
-        document.getElementById('userPhone').value = userProfile.phone;
-    }
-    if (userProfile.address) {
-        document.getElementById('userAddress').value = userProfile.address;
-    }
+function loadUserProfile() {
+    userProfile = window.userProfileData || { name: '', phone: '', address: '' };
+    
+    document.getElementById('userName').value = userProfile.name;
+    document.getElementById('userPhone').value = userProfile.phone;
+    document.getElementById('userAddress').value = userProfile.address;
+    
+    displayOrderHistory();
 }
 
-function loadUserData() {
-    loadProfileData();
-    loadOrdersHistory();
-}
-
-function loadOrdersHistory() {
+function displayOrderHistory() {
     const ordersList = document.getElementById('ordersList');
+    const orders = window.orderHistory || [];
     
     if (orders.length === 0) {
         ordersList.innerHTML = '<p class="no-orders">У вас пока нет заказов</p>';
         return;
     }
     
-    ordersList.innerHTML = orders.map(order => `
-        <div class="order-item">
-            <div class="order-header">
-                <strong>Заказ #${order.id}</strong>
-                <span class="order-date">${order.date}</span>
+    let ordersHTML = '';
+    orders.forEach(order => {
+        ordersHTML += `
+            <div class="order-item">
+                <div class="order-header">
+                    <span class="order-id">Заказ #${order.id}</span>
+                    <span class="order-date">${order.date}</span>
+                </div>
+                <div class="order-status">Статус: ${order.status}</div>
+                <div class="order-total">Сумма: ${order.total} сомони</div>
+                <div class="order-items">
+                    Товаров: ${order.items.reduce((sum, item) => sum + item.quantity, 0)}
+                </div>
             </div>
-            <div class="order-items">
-                ${order.items.map(item => `
-                    <div class="order-product">
-                        ${item.name} x${item.quantity}
-                    </div>
-                `).join('')}
-            </div>
-            <div class="order-total">
-                <strong>Итого: ${order.total} сомони</strong>
-            </div>
-            <div class="order-status">
-                Статус: <span class="status-badge">${order.status}</span>
-            </div>
-        </div>
-    `).join('');
+        `;
+    });
+    
+    ordersList.innerHTML = ordersHTML;
 }
 
 // Utility functions
-function showMessage(message, type = 'info') {
+function showMessage(message, type) {
     // Remove existing messages
     const existingMessages = document.querySelectorAll('.message');
     existingMessages.forEach(msg => msg.remove());
     
     // Create new message
-    const messageElement = document.createElement('div');
-    messageElement.className = `message ${type}`;
-    messageElement.textContent = message;
+    const messageEl = document.createElement('div');
+    messageEl.className = `message ${type}`;
+    messageEl.textContent = message;
     
-    // Add to current section
+    // Insert at the top of the active section
     const activeSection = document.querySelector('.section.active');
     if (activeSection) {
-        activeSection.insertBefore(messageElement, activeSection.firstChild);
+        activeSection.insertBefore(messageEl, activeSection.firstChild);
     }
     
     // Auto remove after 5 seconds
     setTimeout(() => {
-        messageElement.remove();
+        messageEl.remove();
     }, 5000);
 }
 
@@ -478,116 +603,72 @@ function toggleMobileMenu() {
     navMenu.classList.toggle('active');
 }
 
-// Handle browser navigation
-window.addEventListener('popstate', function() {
-    const hash = window.location.hash.substring(1) || 'home';
-    showSection(hash);
-});
-
-// Initialize on page load
-window.addEventListener('load', function() {
-    const hash = window.location.hash.substring(1) || 'home';
-    showSection(hash);
-});
-
-// Format phone number input
+// Initialize cart display when cart section is shown
 document.addEventListener('DOMContentLoaded', function() {
-    const phoneInput = document.getElementById('userPhone');
-    if (phoneInput) {
-        phoneInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.startsWith('992')) {
-                value = value.substring(3);
-            }
-            
-            if (value.length > 0) {
-                if (value.length <= 2) {
-                    value = `+992 ${value}`;
-                } else if (value.length <= 5) {
-                    value = `+992 ${value.substring(0, 2)} ${value.substring(2)}`;
-                } else if (value.length <= 7) {
-                    value = `+992 ${value.substring(0, 2)} ${value.substring(2, 5)} ${value.substring(5)}`;
-                } else {
-                    value = `+992 ${value.substring(0, 2)} ${value.substring(2, 5)} ${value.substring(5, 7)} ${value.substring(7, 9)}`;
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const cartSection = document.getElementById('cart');
+                if (cartSection && cartSection.classList.contains('active')) {
+                    displayCart();
                 }
             }
-            
-            e.target.value = value;
-        });
-    }
-});
-
-// Search functionality
-function searchProducts(query) {
-    const filteredProducts = products.filter(product => 
-        product.name.toLowerCase().includes(query.toLowerCase()) ||
-        product.description.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    const productsGrid = document.getElementById('productsGrid');
-    
-    if (filteredProducts.length === 0) {
-        productsGrid.innerHTML = '<p class="text-center">Товары не найдены</p>';
-        return;
-    }
-    
-    productsGrid.innerHTML = filteredProducts.map(product => `
-        <div class="product-card">
-            <div class="product-image">
-                ${product.image}
-            </div>
-            <div class="product-info">
-                <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
-                <div class="product-price">${product.price} сомони</div>
-                <button class="btn btn-primary" onclick="addToCart(${product.id})">
-                    <i class="fas fa-cart-plus"></i> В корзину
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Add smooth scrolling to anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
-});
-
-// Lazy loading for images (if needed in future)
-function lazyLoadImages() {
-    const images = document.querySelectorAll('img[data-src]');
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.classList.remove('lazy');
-                imageObserver.unobserve(img);
-            }
         });
     });
     
-    images.forEach(img => imageObserver.observe(img));
+    const cartSection = document.getElementById('cart');
+    if (cartSection) {
+        observer.observe(cartSection, { attributes: true });
+    }
+});
+
+// Add styles for order history
+const orderHistoryStyles = `
+.order-item {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
-// PWA Service Worker registration (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-                console.log('SW registered: ', registration);
-            })
-            .catch(function(registrationError) {
-                console.log('SW registration failed: ', registrationError);
-            });
-    });
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
 }
+
+.order-id {
+    color: var(--primary-color);
+}
+
+.order-date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.order-status {
+    color: var(--secondary-color);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.order-total {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.no-orders {
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 2rem;
+}
+`;
+
+// Add the styles to the document
+const styleSheet = document.createElement('style');
+styleSheet.textContent = orderHistoryStyles;
+document.head.appendChild(styleSheet);
