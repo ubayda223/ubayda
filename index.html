@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurkiyaMode - Магазин одежды и техники</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🛍️ TurkiyaMode</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="#home" class="nav-link active">Главная</a></li>
+                    <li><a href="#shop" class="nav-link">Магазин</a></li>
+                    <li><a href="#profile" class="nav-link">Профиль</a></li>
+                    <li><a href="#cart" class="nav-link">Корзина <span class="cart-count">0</span></a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h2>Добро пожаловать в TurkiyaMode</h2>
+                    <p>Качественная одежда и современная техника по доступным ценам</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="showSection('shop')">Перейти в магазин</button>
+                        <a href="https://t.me/ubayda_1507" class="btn btn-secondary" target="_blank">
+                            <i class="fab fa-telegram"></i> Связаться в Telegram
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="hero-card">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-tshirt"></i>
+                    <h3>Модная одежда</h3>
+                    <p>Последние тренды из Турции</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-laptop"></i>
+                    <h3>Современная техника</h3>
+                    <p>Качественная электроника</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3>Быстрая доставка</h3>
+                    <p>Доставим в кратчайшие сроки</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shop Section -->
+        <section id="shop" class="section">
+            <div class="container">
+                <h2>Наш магазин</h2>
+                <div class="shop-filters">
+                    <button class="filter-btn active" data-category="all">Все товары</button>
+                    <button class="filter-btn" data-category="clothing">Одежда</button>
+                    <button class="filter-btn" data-category="electronics">Техника</button>
+                </div>
+                
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="section">
+            <div class="container">
+                <div class="profile-container">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3>Мой профиль</h3>
+                        </div>
+                        <div class="profile-form">
+                            <div class="form-group">
+                                <label>Имя</label>
+                                <input type="text" id="userName" placeholder="Введите ваше имя">
+                            </div>
+                            <div class="form-group">
+                                <label>Телефон</label>
+                                <input type="tel" id="userPhone" placeholder="+992 __ ___ __ __">
+                            </div>
+                            <div class="form-group">
+                                <label>Адрес</label>
+                                <textarea id="userAddress" placeholder="Ваш адрес доставки"></textarea>
+                            </div>
+                            <button class="btn btn-primary" onclick="saveProfile()">Сохранить</button>
+                        </div>
+                    </div>
+                    
+                    <div class="orders-card">
+                        <h3>История заказов</h3>
+                        <div class="orders-list" id="ordersList">
+                            <p class="no-orders">У вас пока нет заказов</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cart Section -->
+        <section id="cart" class="section">
+            <div class="container">
+                <h2>Корзина</h2>
+                <div class="cart-container">
+                    <div class="cart-items" id="cartItems">
+                        <p class="empty-cart">Корзина пуста</p>
+                    </div>
+                    <div class="cart-summary">
+                        <div class="summary-card">
+                            <h3>Итого</h3>
+                            <div class="summary-row">
+                                <span>Товары:</span>
+                                <span id="subtotal">0 сомони</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Доставка:</span>
+                                <span>Бесплатно</span>
+                            </div>
+                            <div class="summary-total">
+                                <span>Всего:</span>
+                                <span id="total">0 сомони</span>
+                            </div>
+                            <button class="btn btn-primary btn-full" onclick="checkout()">Оформить заказ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Contact Buttons -->
+    <div class="contact-buttons">
+        <a href="https://t.me/ubayda_1507" class="contact-btn telegram" target="_blank">
+            <i class="fab fa-telegram"></i>
+        </a>
+        <a href="https://wa.me/992905746633" class="contact-btn whatsapp" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>TurkiyaMode</h3>
+                    <p>Ваш надежный партнер в мире моды и технологий</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p><i class="fas fa-phone"></i> +992 90 574 66 33</p>
+                    <p><i class="fab fa-telegram"></i> @ubayda_1507</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Следите за нами</h4>
+                    <div class="social-links">
+                        <a href="https://t.me/ubayda_1507" target="_blank"><i class="fab fa-telegram"></i></a>
+                        <a href="https://wa.me/992905746633" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 TurkiyaMode. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
