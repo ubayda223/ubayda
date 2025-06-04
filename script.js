@@ -86,6 +86,12 @@ function initializeApp() {
     loadProducts();
     loadUserProfile();
     loadCart();
+    // Debugging navigation
+    console.log('Initializing navigation...');
+    showSection('home'); // Ensure the home section is visible by default
+
+    // Debugging event listeners
+    console.log('Setting up event listeners...');
     setupEventListeners();
     updateCartDisplay();
 }
