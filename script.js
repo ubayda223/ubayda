@@ -575,33 +575,84 @@ function displayOrderHistory() {
     ordersList.innerHTML = ordersHTML;
 }
 
-// Utility functions
-function showMessage(message, type) {
-    // Remove existing messages
-    const existingMessages = document.querySelectorAll('.message');
-    existingMessages.forEach(msg => msg.remove());
-    
-    // Create new message
-    const messageEl = document.createElement('div');
-    messageEl.className = `message ${type}`;
-    messageEl.textContent = message;
-    
-    // Insert at the top of the active section
-    const activeSection = document.querySelector('.section.active');
-    if (activeSection) {
-        activeSection.insertBefore(messageEl, activeSection.firstChild);
-    }
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        messageEl.remove();
-    }, 5000);
-}
+// Firebase Authentication
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-storage.js";
 
-function toggleMobileMenu() {
-    const navMenu = document.querySelector('.nav-menu');
-    navMenu.classList.toggle('active');
-}
+const auth = getAuth();
+const storage = getStorage();
+
+// Регистрация пользователя
+const registerForm = document.getElementById('registerForm');
+registerForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        alert('Регистрация прошла успешно!');
+    } catch (error) {
+        console.error('Ошибка регистрации:', error);
+        alert('Ошибка регистрации: ' + error.message);
+    }
+});
+
+// Вход пользователя
+const loginForm = document.getElementById('loginForm');
+loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        alert('Вход выполнен успешно!');
+    } catch (error) {
+        console.error('Ошибка входа:', error);
+        alert('Ошибка входа: ' + error.message);
+    }
+});
+
+// Добавление товара с фото
+const addProductForm = document.getElementById('addProductForm');
+addProductForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const name = document.getElementById('productName').value;
+    const price = document.getElementById('productPrice').value;
+    const category = document.getElementById('productCategory').value;
+    const description = document.getElementById('productDescription').value;
+    const imageFile = document.getElementById('productImage').files[0];
+
+    if (imageFile) {
+        const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+        try {
+            await uploadBytes(storageRef, imageFile);
+            const imageUrl = await getDownloadURL(storageRef);
+
+            const newProduct = {
+                name,
+                price,
+                category,
+                description,
+                image: imageUrl
+            };
+
+            await addProductToDatabase(newProduct);
+            alert('Товар успешно добавлен!');
+            addProductForm.reset();
+        } catch (error) {
+            console.error('Ошибка загрузки фото:', error);
+            alert('Ошибка загрузки фото: ' + error.message);
+        }
+    } else {
+        alert('Пожалуйста, выберите фото товара.');
+    }
+});
+
 
 // Initialize cart display when cart section is shown
 document.addEventListener('DOMContentLoaded', function() {
